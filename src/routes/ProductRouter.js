@@ -8,7 +8,7 @@ router.get("/",async (req,res)=>{
 
     try{
         const products=await ProductModel.find({});
-        return res.json(products);
+        return res.json({products});
     }catch(err){
         console.log(err);
         return res.json(null);
@@ -20,10 +20,21 @@ router.get("/:productId",async (req,res)=>{
 
     try{
         const product=await ProductModel.findById(id);
-        return res.json(product);
+
+        return res.json({product});
     }catch(err){
         console.log(err);
         return res.json(null);
+    }
+});
+
+router.post("/newProduct",async (req,res)=>{
+
+    try{
+        const newProduct=await new ProductModel(req.body).save();
+        res.json("new product saved");
+    }catch(err){
+        console.log(err);
     }
 });
 

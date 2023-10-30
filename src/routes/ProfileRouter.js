@@ -6,14 +6,14 @@ import { UserModel } from "../Models/User.js";
 
 const router=express.Router();
 
-router.get("/:username",async (req,res)=>{
-    const username=req.params.username;
+router.get("/:userId",async (req,res)=>{
+    const userId=req.params.userId;
 
     try{
-        const user=await UserModel.findOne({username});
+        const user=await UserModel.findById(userId);
         
         if(user){
-            return res.json(user);
+            return res.json({user});
         }else{
             console.log("not found");
             return res.json(null);
@@ -31,7 +31,7 @@ router.get("/cart/:username",async (req,res)=>{
         const products=await LikedProductModel.find({username});
         
         if(products){
-            return res.json(products);
+            return res.json({products});
         }else{
             console.log("not found");
             return res.json(null);

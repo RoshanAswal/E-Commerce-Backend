@@ -1,10 +1,13 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
 
 import { UserModel } from '../Models/User.js';
 
 const router=express.Router();
+
+dotenv.config();
 
 router.post("/register",async (req,res)=>{
     const {username,password,email}=req.body;
@@ -18,7 +21,7 @@ router.post("/register",async (req,res)=>{
             const newUser=new UserModel({username,password:hashedPassword,email});
             await newUser.save();
             console.log("user registered");
-            return res.json("user registered");
+            return res.json("user registered!! Please login now");
         }
     }catch(err){
         console.log(err);
@@ -30,16 +33,20 @@ router.post("/login",async (req,res)=>{
     const {username,password}=req.body;
 
     try{
+
         const user=await UserModel.findOne({username});
        
         if(user){
+
             const hashedPassword=await bcrypt.compare(password,user.password);
-    
+
             if(!hashedPassword){
                 return res.json(null);
             }else{
                 console.log("Welcome");
-                return res.json("Welcome "+username);
+
+                const token=jwt.sign({id:user._id},process.env.SECRET);
+                res.json({token,userId:user._id});
             }
         }else{
             console.log("User not found");
