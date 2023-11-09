@@ -12,7 +12,13 @@ const app=express();
 dotenv.config();
 
 app.use(express.json());
-app.use(cors()); 
+app.use(cors(
+    {
+        origin:['https://e-commerce-psi-self.vercel.app/'],
+        methods:["POST","GET"],
+        credentials:true
+    }
+)); 
 
 app.use("/auth",UserRouter);
 app.use("/",ProductRouter);
