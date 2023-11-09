@@ -3,9 +3,9 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 
-import { UserRouter } from './routes/UserRouter.js';
-import { ProductRouter } from './routes/ProductRouter.js';
-import { ProfileRouter } from './routes/ProfileRouter.js';
+import { UserRouter } from './src/routes/UserRouter.js';
+import { ProductRouter } from './src/routes/ProductRouter.js';
+import { ProfileRouter } from './src/routes/ProfileRouter.js';
 
 const app=express();
 
