@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import bodyParser from 'body-parser';
 
 import { UserRouter } from './src/routes/UserRouter.js';
 import { ProductRouter } from './src/routes/ProductRouter.js';
@@ -12,6 +13,7 @@ const app=express();
 dotenv.config();
 
 app.use(express.json());
+app.use(bodyParser.urlencoded({extended:true}));
 app.use(cors(
     {
         origin:['https://e-commerce-psi-self.vercel.app/'],
