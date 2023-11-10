@@ -20,8 +20,6 @@ app.use("/auth",UserRouter);
 app.use("/profile",ProfileRouter);
 app.use("/",ProductRouter);
 
-
-
 mongoose.connect(process.env.MONGODB_LOCAL_URL).then(console.log("connected to database"));
 
 app.listen(3001,()=>{
