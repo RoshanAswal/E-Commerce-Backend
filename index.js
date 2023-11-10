@@ -12,7 +12,7 @@ const app=express();
 
 dotenv.config();
 
-app.use(express.json());
+// app.use(express.json());
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(cors(
     {
