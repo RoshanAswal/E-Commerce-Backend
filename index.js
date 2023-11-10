@@ -20,9 +20,14 @@ app.use(cors(
     }
 )); 
 
+app.get("/",(req,res)=>{
+    res.json("Hey there");
+})
+
 app.use("/auth",UserRouter);
 app.use("/",ProductRouter);
 app.use("/profile",ProfileRouter);
+
 
 mongoose.connect(process.env.MONGODB_LOCAL_URL).then(console.log("connected to database"));
 
