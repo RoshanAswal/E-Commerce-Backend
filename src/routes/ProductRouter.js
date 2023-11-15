@@ -2,6 +2,7 @@ import express from 'express';
 
 import { LikedProductModel } from "../Models/LikedProduct.js";
 import { ProductModel } from '../Models/Product.js'
+import { UserModel } from '../Models/User.js';
 const router=express.Router();
 
 router.get("/",async (req,res)=>{
@@ -38,16 +39,22 @@ router.post("/newProduct",async (req,res)=>{
     }
 });
 
-router.post("/:productId/addCart",async (req,res)=>{
-    const id=req.params.productId;
-
+router.put("/:userId/:productId/addCart",async (req,res)=>{
+    const {userId,productId}=req.params;
+    const user=await UserModel.findById(userId);
+    console.log(user);
     try{
-        const product=await ProductModel.findById(id);
-        await LikedProductModel.insertMany(product);
-        return res.json("added to your cart");
+        const response=user.likedProducts.find((e)=>e==productId);
+        if(response){
+            return res.json({data:'already',msg:"Already added in cart"});            
+        }
+        await UserModel.updateOne({_id:userId},
+            {$push:{likedProducts:productId}}
+        )
+        return res.json({data:'noError',msg:"Added to your cart"});
     }catch(err){
         console.log(err);
-        return res.json("Could not add the item");
+        return res.json({data:'error',msg:"Could not add the item"});
     }
 });
 

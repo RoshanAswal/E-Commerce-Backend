@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const LikedProductSchema=new mongoose.Schema({
+    // userId:{type:}
     productName:{type:String,required:true},
     productDescription:{type:String,required:true},
     productPrice:{type:Number},

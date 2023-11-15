@@ -11,21 +11,23 @@ dotenv.config();
 
 router.post("/register",async (req,res)=>{
     const {username,password,email}=req.body;
-    
+
     try{
         const user=await UserModel.findOne({username});
-        if(user){
-            res.json("User already registered");
+        if(user){ 
+            return res.json({message:'N',data:"User already registered"});
         }else{
-            const hashedPassword=await bcrypt.hash(password,10);
-            const newUser=new UserModel({username,password:hashedPassword,email});
-            await newUser.save();
-            console.log("user registered");
-            return res.json("user registered!! Please login now");
+            const salt = await bcrypt.genSalt(10);
+
+            const hashedPassword = await bcrypt.hash(password, salt);
+
+            await UserModel.create({username,password:hashedPassword,email,phoneNo:''});
+            
+            return res.json({message:'Y',data:"user registered!! Please login now"});
         }
     }catch(err){
         console.log(err);
-        return res.json(null);
+        return res.json({data:null});
     }
 });
 
@@ -43,14 +45,12 @@ router.post("/login",async (req,res)=>{
             if(!hashedPassword){
                 return res.json(null);
             }else{
-                console.log("Welcome");
 
                 const token=jwt.sign({id:user._id},process.env.SECRET);
                 res.json({token,userId:user._id});
             }
         }else{
-            console.log("User not found");
-            return res.json(null);
+            return res.json({data:null});
         }
 
     }catch(err){

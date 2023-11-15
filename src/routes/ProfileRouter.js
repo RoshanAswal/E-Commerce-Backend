@@ -3,6 +3,7 @@ import express from 'express';
 import { LikedProductModel } from "../Models/LikedProduct.js";
 import { HistoryProductsModel } from "../Models/HistoryProducts.js";
 import { UserModel } from "../Models/User.js";
+import mongoose, { Mongoose, ObjectId } from 'mongoose';
 
 const router=express.Router();
 
@@ -24,51 +25,48 @@ router.get("/:userId",async (req,res)=>{
     }
 });
 
-router.get("/cart/:username",async (req,res)=>{
-    const username=req.params.username;
+router.get("/:userId/cart",async (req,res)=>{
+    const userId=req.params.userId;
 
     try{
-        const products=await LikedProductModel.find({username});
-        
-        if(products){
-            return res.json({products});
+        const user=await UserModel.findById(userId);
+        if(user){
+            const products=await user.populate('likedProducts');
+            return res.json({products:products.likedProducts});
         }else{
-            console.log("not found");
-            return res.json(null);
+            return res.json({data:null});
         }
     }catch(err){
-        console.log(err);
         return res.json(null);
     }
 });
 
-router.get("/history/:username",async (req,res)=>{
-    const username=req.params.username;
+router.get("/:userId/history",async (req,res)=>{
+    const userId=req.params.userId;
 
     try{
-        const products=await HistoryProductsModel.find({username});
-
-        if(products){
-            console.log("here are your products");
-            return res.json(products);
+        const user=await UserModel.findById(userId);
+        if(user){
+            const products=await user.populate('historyProducts');
+            return res.json({products:products.historyProducts});
         }else{
-            console.log("not found");
-            return res.json(null);
+            return res.json({data:null});
         }
     }catch(err){
-        console.log(err);
         return res.json(null);
     }
 });
 
 
-router.put("/edit/:username/",async (req,res)=>{
-    const {email,phoneNo,address1,address2,upiId1,upiId2}=req.body;
-    const username=req.params.username;
+router.put("/edit/:userId/",async (req,res)=>{
+    const {username,email,phoneNo,address1,address2,upiId1,upiId2}=req.body;
+    const userId=req.params.userId;
+   
     try{
-        const user=await UserModel.findOne({username});
+        const user=await UserModel.findById(userId);
         
         if(user){
+            if(username!="")user.username=username;
             if(email!="")user.email=email;
             if(phoneNo!="")user.phoneNo=phoneNo;
             if(address1!="")user.address1=address1;
@@ -88,60 +86,37 @@ router.put("/edit/:username/",async (req,res)=>{
     }
 });
 
-router.put("/deleteProduct/:username",async (req,res)=>{
-    const username=req.params.username;
-    const {productName,model}=req.body;
+router.put("/:userId/deleteProduct",async (req,res)=>{
+    const userId=req.params.userId;
+    const {model,index}=req.body;
+    const user=await UserModel.findById(userId);
     try{
         if(model==="his"){
-            const products=await HistoryProductsModel.findOne({username,productName});
-            
-            if(products){
-                await HistoryProductsModel.deleteOne({username,productName});
-                return res.json("Deleted from history");
-            }else{
-                console.log("not found in history");
-                return res.json(null);
-            }
+            user.historyProducts.splice(index,1);
         }else{
-            const products=await LikedProductModel.findOne({username,productName});
-            
-            if(products){
-                await LikedProductModel.deleteOne({username,productName});
-                console.log("deleted from cart");
-                return res.json("Deleted from cart");
-            }else{
-                console.log("not found in Cart");
-                return res.json(null);
-            }            
+            user.likedProducts.splice(index,1);
         }
-
+        user.save();
+        return res.json({data:"successfully deleted"});
     }catch(err){
-        console.log(err);
-        return res.json(null);
+        return res.json({data:'error'});
     }
 });
 
-router.put("/cart/checkout/:username",async (req,res)=>{
-    const username=req.params.username;
-    
+router.put("/cart/checkout/:userId",async (req,res)=>{
+    const userId=req.params.userId;
+    const user=await UserModel.findById(userId);
     try{
-        const products=await LikedProductModel.find({username});
-        
-        if(products){
-            await HistoryProductsModel.insertMany(products);
-            await LikedProductModel.deleteMany({username});
-
-            console.log("moved");
-            return res.json("Moved");
-        }else{
-            console.log("empty cart");
-            return res.json(null);
-        }
-
+        await UserModel.updateOne({_id:userId},
+            {
+                $push:{historyProducts:{$each:user.likedProducts}},
+                $set:{likedProducts:[]}
+            },
+        );
+        return res.json({data:'Checked out'});
     }catch(err){
-        console.log(err);
-        res.json(null);
+        res.json({data:"error"});
     }
-})
+});
 
 export {router as ProfileRouter}
